@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Sales</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fafb;
+      color: #1e1b4b;
+    }
+
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #6d28d9;
+      padding-top: 20px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h2 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: #e0e7ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: #4c1d95;
+      color: #ffffff;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 40px 30px;
+      background-color: #f9fafb;
+      min-height: 100vh;
+    }
+
+    .topbar h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0 0 20px;
+      color: #6d28d9;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .filters label {
+      margin-right: 5px;
+    }
+
+    .filters select,
+    .filters input[type="date"] {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    canvas {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(109, 40, 217, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>ECOMVISION</h2>
+    <a href="index.html">Dashboard</a>
+    <a href="orders.html">Orders</a>
+    <a href="products.html">Products</a>
+    <a href="customers.html">Customers</a>
+    <a href="dailysale.html" class="active">Daily Sale</a>
+    <a href="breakdown.html">Analytics</a>
+    <a href="settings.html">Settings</a>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <h1>DAILY SALES</h1>
+    </div>
+
+    <div class="filters">
+      <label for="from">From:</label>
+      <input type="date" id="from">
+
+      <label for="to">To:</label>
+      <input type="date" id="to">
+
+      <label for="product">Product:</label>
+      <select id="product">
+        <option value="all">All</option>
+        <option value="Product A">Product A</option>
+        <option value="Product B">Product B</option>
+      </select>
+
+      <label for="region">Region:</label>
+      <select id="region">
+        <option value="all">All</option>
+        <option value="North">North</option>
+        <option value="South">South</option>
+        <option value="East">East</option>
+        <option value="West">West</option>
+      </select>
+
+      <label for="user">User:</label>
+      <select id="user">
+        <option value="all">All</option>
+        <option value="User A">User A</option>
+        <option value="User B">User B</option>
+      </select>
+    </div>
+
+    <canvas id="salesChart" height="120"></canvas>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const fullData = [
+      { date: "2024-01-01", sales: 7500, units: 900, product: "Product A", region: "North", user: "User A" },
+      { date: "2024-01-02", sales: 8200, units: 950, product: "Product B", region: "South", user: "User B" },
+      { date: "2024-01-03", sales: 6900, units: 870, product: "Product A", region: "North", user: "User B" },
+      { date: "2024-01-04", sales: 8100, units: 910, product: "Product A", region: "East", user: "User A" },
+      { date: "2024-01-05", sales: 7800, units: 940, product: "Product B", region: "West", user: "User B" },
+      { date: "2024-01-06", sales: 8500, units: 980, product: "Product A", region: "South", user: "User A" },
+      { date: "2024-01-07", sales: 7900, units: 930, product: "Product B", region: "East", user: "User A" }
+    ];
+
+    const salesChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Total Sales',
+            data: [],
+            borderColor: '#facc15',
+            backgroundColor: 'transparent',
+            pointBorderColor: '#facc15',
+            pointBackgroundColor: '#facc15',
+            fill: false,
+            tension: 0.3
+          },
+          {
+            label: 'Total Units',
+            data: [],
+            borderColor: '#a78bfa',
+            backgroundColor: 'transparent',
+            pointBorderColor: '#a78bfa',
+            pointBackgroundColor: '#a78bfa',
+            fill: false,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#1e1b4b'
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#1e1b4b' },
+            grid: { color: '#e5e7eb' }
+          },
+          y: {
+            ticks: { color: '#1e1b4b' },
+            grid: { color: '#e5e7eb' }
+          }
+        }
+      }
+    });
+
+    function updateChart() {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      const product = document.getElementById('product').value;
+      const region = document.getElementById('region').value;
+      const user = document.getElementById('user').value;
+
+      const filtered = fullData.filter(item => {
+        return (product === 'all' || item.product === product) &&
+               (region === 'all' || item.region === region) &&
+               (user === 'all' || item.user === user) &&
+               (!from || item.date >= from) &&
+               (!to || item.date <= to);
+      }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const labels = filtered.map(item => item.date);
+      const sales = filtered.map(item => item.sales);
+      const units = filtered.map(item => item.units);
+
+      salesChart.data.labels = labels;
+      salesChart.data.datasets[0].data = sales;
+      salesChart.data.datasets[1].data = units;
+      salesChart.update();
+
+      if (filtered.length === 0) {
+        alert('No data available for the selected filters.');
+      }
+    }
+
+    function setDefaultDates() {
+      const dates = fullData.map(item => new Date(item.date));
+      const minDate = new Date(Math.min.apply(null, dates));
+      const maxDate = new Date(Math.max.apply(null, dates));
+      document.getElementById('from').value = minDate.toISOString().split('T')[0];
+      document.getElementById('to').value = maxDate.toISOString().split('T')[0];
+    }
+
+    document.querySelectorAll('#from, #to, #product, #region, #user')
+      .forEach(input => input.addEventListener('change', updateChart));
+
+    setDefaultDates();
+    updateChart();
+  </script>
+
+</body>
+</html>
